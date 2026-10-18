@@ -9,12 +9,15 @@
 #include <tuple>
 
 void SudokuGrid::print() {
+	std::cout << "-------------------\n";
 	for (int i = 0; i < 9; i++) {
+		std::cout << "|";
 		for (int j = 0; j < 9; j++) {
-			std::cout << int(grid[i][j]);
+			std::cout << int(grid[i][j]) << "|";
 		}
 
 		std::cout << "\n";
+		std::cout << "-------------------\n";
 	}
 }
 
@@ -55,107 +58,7 @@ void CheckResults::print() {
 	}
 }
 
-/*
-SudokuGrid SudokuGrid_solve(SudokuGrid grid) {
-	std::vector<SolverState> backups;
 
-	int counter = 0;
-	while (true) {
-		auto cand = generate_candidates(grid);
-		int loop_min_size = 100; // Random value as placeholder
-		int loop_min_i, loop_min_j = 0;
-
-		for (int i = 0; i < 9; i++) {
-			for (int j = 0; j < 9; j++) {
-				if (grid.grid[i][j] != 0) continue;
-				auto size = cand.grid[i][j].size();
-				if (size < loop_min_size) {
-					std::cout << int(grid.grid[i][j]) << "\n";
-					std::cout << "New min" << size << " " << i << j << "\n";
-					loop_min_size = size;
-					loop_min_i = i;
-					loop_min_j = j;
-				}
-				if (cand.grid[i][j].size() == 1) {
-					grid.grid[i][j] = cand.grid[i][j][0];
-
-					goto loop_end;
-				}
-			}
-		}
-//loop_end:;
-
-		if (loop_min_size == 1) {
-			// Just pick the lowest value for now.
-			// Will liekly need to track multiple
-			// for brute force searching in the future
-			grid.grid[loop_min_i][loop_min_j] = cand.grid[loop_min_i][loop_min_j][0];
-		} else if (loop_min_size > 1 && loop_min_size != 100) {
-			// Need to save current state for backtracking
-
-		} else (loop_min_size == 0 && grid.grid[loop_min_i][loop_min_j] > 0) {
-			// We have run into an invalid path, need to backtrack
-
-		}
-
-		if (loop_min_size == 100) {
-			// No more possible moves	
-			break;
-		}
-
-		std::cout << "\n";
-		cand.print();
-		
-		std::cout << "\n";
-		grid.print();
-
-		counter++;
-		if (counter > 4) break;
-	}
-
-	return grid;
-}
-*/
-
-
-
-std::vector<std::tuple<int, int>> get_indices_of_min_candidates(CandidateGrid cand,
-		SudokuGrid grid) {
-	bool invalid_solution_flag = false;
-
-	// Identify minimum size
-	int min_size = 100; // arbitrary value
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 9; j++) {
-			if (grid.grid[i][j] > 0) continue;
-
-			auto size = cand.grid[i][j].size();
-			if (size == 0 && grid.grid[i][j] == 0) {
-				// invalid solution
-				return {};
-			}
-
-			if (size < min_size) {
-				min_size = size;
-			}
-		}
-	}
-
-	//cand.print();
-	std::vector<std::tuple<int, int>> out;
-
-	// Collect indices of all min_candidates
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 9; j++) {
-			auto size = cand.grid[i][j].size();
-			if (size == min_size) {
-				out.push_back({i, j});
-			}
-		}
-	}
-
-	return out;
-}
 
 struct SolverState {
 	SudokuGrid grid;
@@ -427,6 +330,5 @@ CandidateGrid generate_candidates(const SudokuGrid &grid) {
 	}
 
 	return cand;
-
 }
 

@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 		std::cout << "Starting grid:\n";
 		start.print();
 
+		std::cout << "\n";
+
 		if (!solved) {
 			std::cout << "Unable to solve sudoku grid\n";
 		} else {
