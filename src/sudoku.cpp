@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <set>
 #include <tuple>
+#include <random>
 
 void SudokuGrid::print() {
 	std::cout << "-------------------\n";
@@ -18,6 +19,15 @@ void SudokuGrid::print() {
 
 		std::cout << "\n";
 		std::cout << "-------------------\n";
+	}
+}
+
+void SudokuGrid::print_basic() {
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 9; j++) {
+			std::cout << int(grid[i][j]);
+		}
+		std::cout << "\n";
 	}
 }
 
@@ -47,6 +57,98 @@ SudokuGrid SudokuGrid_from_file(const char *filename) {
 
 
 	return SudokuGrid_from_string(content.c_str());
+}
+
+bool SudokuGrid_generate_inner(
+		SudokuGrid &grid, 
+		std::default_random_engine &gen,
+		int n_filled,
+		int depth) {
+
+	if (depth == n_filled) {
+		return true;
+	}
+
+	auto cand = generate_candidates(grid);
+	size_t best_size = 100;
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 9; j++) {
+			if (grid.grid[i][j] != 0) continue;
+
+			size_t size = cand.grid[i][j].size();
+			if (size == 0) return false;
+			if (size < best_size) {
+				best_size = size;
+			}
+		}
+	}
+
+	if (best_size == 100) return true;
+
+	std::vector<std::vector<uint8_t>> min_cands;
+	std::vector<std::vector<int>> min_cands_coords;
+	for (int i = 0; i < 9; i++) {
+		for (int j = 0; j < 9; j++) {
+			if (cand.grid[i][j].size() > 0) {
+				min_cands.push_back(cand.grid[i][j]);
+				min_cands_coords.push_back({i, j});
+			}
+		}
+	}
+
+	// Keep trying forever
+	// This is probably bugged, but need to check performance
+	std::uniform_int_distribution<int> min_indices(0, min_cands.size()-1);
+	for (int tries_outer = 0; tries_outer < min_cands.size(); tries_outer++) {
+		auto min_i = min_indices(gen);
+		auto i = min_cands_coords[min_i][0];
+		auto j = min_cands_coords[min_i][1];
+
+		for (int tries_inner = 0; tries_inner < 10; tries_inner++) {
+			std::uniform_int_distribution<int> min_cand_ind(0, min_cands[min_i].size()-1);
+			auto k = min_cand_ind(gen);
+			grid.grid[i][j] = min_cands[min_i][k];
+
+			auto check_copy = grid;
+			bool solvable = SudokuGrid_solve_recursive(check_copy);
+			if (!solvable) {
+				grid.grid[i][j] = 0;
+				continue;
+			};
+
+			if (SudokuGrid_generate_inner(grid, gen, n_filled, depth+1)) return true;
+			grid.grid[i][j] = 0;
+		}
+
+		grid.grid[i][j] = 0;
+	}
+
+	//grid.grid[best_i][best_j] = 0; // Reset
+	return false;
+}
+
+SudokuGrid SudokuGrid_generate(int n_filled_spots) {
+	std::random_device r;
+	std::default_random_engine gen(r());
+	std::uniform_int_distribution<int> val_dist(1, 9);
+	std::uniform_int_distribution<int> pos_dist(0, 80); // 1D index of grid
+
+
+	auto p1 = pos_dist(gen);
+	auto p1_i = p1 / 9;
+	auto p1_j = p1 % 9;
+
+	auto grid = SudokuGrid();
+
+	grid.grid[p1_i][p1_j] = val_dist(gen);
+
+	while (true) {
+		auto probe = grid;
+		bool success = SudokuGrid_generate_inner(probe, gen, n_filled_spots, 1);
+		if (success) return probe;
+	}
+		
+	return grid;
 }
 
 void CheckResults::print() {
