@@ -1,6 +1,6 @@
-# Sudoku Solver
+# Sudoku Solver and Generator
 
-A simple sudoku solver that takes text files as input
+A simple sudoku solver that takes text files as input and a generator that takes a single integer as an input and outputs the grid in the format shown below (same format used for solver).
 
 Example file contents:
 ```
@@ -23,6 +23,7 @@ Can be built by running `make` or by using the nix flake (`nix build`)
 
 ```
 nix profile add github:ccoverstreet/sudokusolver
+sudokugen 30 > mypuzzle.txt
 sudokusolver <filenames>
 ```
 
